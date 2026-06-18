@@ -1,0 +1,174 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    font-family: Arial, sans-serif;
+    color: #111;
+}
+
+body.dark {
+    background-color: #0a0a0a;
+    color: #f2f2f2;
+}
+
+.game {
+    text-align: center;
+    padding: 30px;
+    width: 360px;
+}
+
+h1 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 28px;
+    letter-spacing: 1px;
+}
+
+.info {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.info p {
+    margin: 0;
+    padding: 8px 16px;
+    background-color: #111;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+body.dark .info p {
+    background-color: #fff;
+    color: #111;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: bold;
+    background-color: #111;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #444;
+}
+
+body.dark button {
+    background-color: #fff;
+    color: #111;
+}
+
+body.dark button:hover {
+    background-color: #ccc;
+}
+
+#themeToggle {
+    display: block;
+    margin: 0 auto 22px;
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 320px;
+    margin: 0 auto 20px;
+    background-color: #111;
+    padding: 8px;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+body.dark #board {
+    background-color: #fff;
+}
+
+.cell {
+    background-color: #fff;
+    color: #111;
+    border-radius: 6px;
+    height: 68px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    border: 2px solid #111;
+}
+
+.cell:hover {
+    background-color: #f0f0f0;
+}
+
+.cell.empty {
+    background-color: transparent;
+    border: none;
+    cursor: default;
+}
+
+.cell.empty:hover {
+    background-color: transparent;
+}
+
+body.dark .cell {
+    background-color: #111;
+    color: #fff;
+    border: 2px solid #fff;
+}
+
+body.dark .cell:hover {
+    background-color: #222;
+}
+
+.win-message {
+    margin-top: 20px;
+    padding: 16px;
+    background-color: #111;
+    color: #fff;
+    border-radius: 8px;
+    animation: show 0.3s ease;
+}
+
+body.dark .win-message {
+    background-color: #fff;
+    color: #111;
+}
+
+.win-message h2 {
+    margin: 0 0 8px;
+    font-size: 22px;
+}
+
+.win-message p {
+    margin: 4px 0;
+    font-size: 16px;
+}
+
+.hidden {
+    display: none;
+}
+
+@keyframes show {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
