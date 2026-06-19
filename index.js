@@ -1,4 +1,3 @@
-const board = document.getElementById("board");
 const movesElement = document.getElementById("moves");
 const timerElement = document.getElementById("timer");
 const winMessage = document.getElementById("winMessage");
@@ -6,6 +5,7 @@ const winMoves = document.getElementById("winMoves");
 const winTime = document.getElementById("winTime");
 const themeToggle = document.getElementById("themeToggle");
 const newGameBtn = document.getElementById("newGameBtn");
+const pivotContainer = document.getElementById("pivotContainer");
 
 let list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, ""];
 const winList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, ""];
@@ -14,6 +14,7 @@ let seconds = 0;
 let timerId = null;
 let gameStarted = false;
 let gameOver = false;
+let pivot = null;
 
 if (localStorage.getItem("theme") === "dark") {
     document.body.classList.add("dark");
@@ -37,25 +38,7 @@ newGameBtn.addEventListener("click", startNewGame);
 startNewGame();
 
 function drawBoard() {
-    board.innerHTML = "";
-
-    for (let i = 0; i < list.length; i++) {
-        const cell = document.createElement("div");
-        cell.classList.add("cell");
-
-        if (list[i] === "") {
-            cell.classList.add("empty");
-        } else {
-            cell.textContent = list[i];
-        }
-
-        cell.addEventListener("click", function (e) {
-            const index = Array.from(board.children).indexOf(e.currentTarget);
-            moveTile(index);
-        });
-
-        board.appendChild(cell);
-    }
+    updateWebDataRocks();
 }
 
 function startNewGame() {
@@ -79,7 +62,9 @@ function shuffle() {
         }
     } while (!isSolvable() || isSolved());
 }
-
+//we check if it can be solved
+//порожня на парному рядку знизу → розв'язувана якщо інверсій непарна кількість
+// - порожня на непарному рядку знизу → розв'язувана якщо інверсій парна кількість
 function isSolvable() {
     const nums = list.filter(function (n) { return n !== ""; });
     let inversions = 0;
@@ -103,33 +88,26 @@ function isSolvable() {
 }
 
 function moveTile(index) {
-    if (gameOver || list[index] === "") return;
+    if (gameOver || !isMovableTile(index)) return;
 
     const emptyIndex = list.indexOf("");
 
-    const left = index === emptyIndex - 1 && emptyIndex % 4 !== 0;
-    const right = index === emptyIndex + 1 && index % 4 !== 0;
-    const up = index === emptyIndex - 4;
-    const down = index === emptyIndex + 4;
-
-    if (left || right || up || down) {
-        if (!gameStarted) {
-            gameStarted = true;
-            timerId = setInterval(function () {
-                seconds++;
-                timerElement.textContent = formatTime(seconds);
-            }, 1000);
-        }
-
-        list[emptyIndex] = list[index];
-        list[index] = "";
-
-        moves++;
-        movesElement.textContent = moves;
-
-        drawBoard();
-        checkWin();
+    if (!gameStarted) {
+        gameStarted = true;
+        timerId = setInterval(function () {
+            seconds++;
+            timerElement.textContent = formatTime(seconds);
+        }, 1000);
     }
+
+    list[emptyIndex] = list[index];
+    list[index] = "";
+
+    moves++;
+    movesElement.textContent = moves;
+
+    drawBoard();
+    checkWin();
 }
 
 function checkWin() {
@@ -165,4 +143,126 @@ function formatTime(total) {
     if (m < 10) m = "0" + m;
     if (s < 10) s = "0" + s;
     return m + ":" + s;
+}
+
+function getTileData() {
+    return list.map(function (tile, index) {
+        return {
+            Row: Math.floor(index / 4) + 1,
+            Column: index % 4 + 1,
+            Tile: tile === "" ? 0 : tile
+        };
+    });
+}
+
+function getWebDataRocksReport() {
+    return {
+        dataSource: {
+            data: getTileData()
+        },
+        slice: {
+            rows: [
+                { uniqueName: "Row" }
+            ],
+            columns: [
+                { uniqueName: "Column" }
+            ],
+            measures: [
+                {
+                    uniqueName: "Tile",
+                    aggregation: "sum"
+                }
+            ]
+        },
+        options: {
+            grid: {
+                type: "classic",
+                showHeaders: false,
+                showFilter: false,
+                showTotals: "off",
+                showGrandTotals: "off",
+                showHierarchies: false,
+                showHierarchyCaptions: false,
+                showReportFiltersArea: false
+            },
+            configuratorButton: false,
+            drillThrough: false,
+            sorting: "off",
+            showAggregations: false
+        },
+        formats: [
+            {
+                name: "",
+                decimalPlaces: 0
+            }
+        ]
+    };
+}
+
+function updateWebDataRocks() {
+    if (typeof WebDataRocks === "undefined" || !pivotContainer) {
+        if (pivotContainer) {
+            pivotContainer.textContent = "WebDataRocks did not load.";
+        }
+        return;
+    }
+
+    if (pivot && typeof pivot.updateData === "function") {
+        pivot.updateData({
+            data: getTileData()
+        });
+        return;
+    }
+
+    pivot = new WebDataRocks({
+        container: "#pivotContainer",
+        toolbar: false,
+        height: 360,
+        customizeCell: customizeTileCell,
+        report: getWebDataRocksReport()
+    });
+
+    pivot.on("cellclick", handleTileClick);
+}
+
+function handleTileClick(cell) {
+    if (!cell || cell.type !== "value" || cell.isTotal || cell.isGrandTotal) return;
+
+    const tile = Number(cell.value);
+    const index = list.indexOf(tile);
+
+    if (index !== -1) {
+        moveTile(index);
+    }
+}
+
+function customizeTileCell(cellBuilder, cellData) {
+    if (cellData.type !== "value" || cellData.isTotal || cellData.isGrandTotal) return;
+
+    const tile = Number(cellData.value);
+    const index = list.indexOf(tile);
+
+    cellBuilder.addClass("game-tile");
+
+    if (tile === 0) {
+        cellBuilder.text = "";
+        cellBuilder.addClass("game-tile-empty");
+        return;
+    }
+
+    if (index !== -1 && isMovableTile(index)) {
+        cellBuilder.addClass("game-tile-movable");
+    }
+}
+
+function isMovableTile(index) {
+    if (index < 0 || list[index] === "") return false;
+
+    const emptyIndex = list.indexOf("");
+    const left = index === emptyIndex - 1 && emptyIndex % 4 !== 0;
+    const right = index === emptyIndex + 1 && index % 4 !== 0;
+    const up = index === emptyIndex - 4;
+    const down = index === emptyIndex + 4;
+
+    return left || right || up || down;
 }
