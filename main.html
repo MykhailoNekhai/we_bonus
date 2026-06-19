@@ -1,10 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Fifteen Puzzle</title>
+    <link href="https://cdn.webdatarocks.com/latest/webdatarocks.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
 </head>
 <body>
-$END$
+
+<div class="game">
+    <button id="themeToggle">🌙 Dark mode</button>
+
+    <h1>Fifteen Puzzle</h1>
+
+    <div class="info">
+        <p>Moves: <span id="moves">0</span></p>
+        <p>Time: <span id="timer">00:00</span></p>
+        <button id="newGameBtn">New game</button>
+    </div>
+
+    <div id="pivotContainer"></div>
+
+    <div id="winMessage" class="win-message hidden">
+        <h2>🎉 You won!</h2>
+        <p>You solved the puzzle!</p>
+        <p>Moves: <span id="winMoves">0</span></p>
+        <p>Time: <span id="winTime">00:00</span></p>
+    </div>
+</div>
+
+<script src="https://cdn.webdatarocks.com/latest/webdatarocks.toolbar.min.js"></script>
+<script src="https://cdn.webdatarocks.com/latest/webdatarocks.js"></script>
+<script src="index.js"></script>
+
 </body>
 </html>
